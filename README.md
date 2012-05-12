@@ -6,10 +6,10 @@ Simple task runner for JavaScript, either in Node.js or in the browser.
 Node.js
 =======
 
-Install using npm `npm install taskrunner` then use with require:
+Install using npm `npm install task-runner` then use with require:
 
-    var TaskRunner = require('taskrunner').TaskRunner,
-        Task = require('taskrunner').Task;
+    var TaskRunner = require('task-runner').TaskRunner,
+        Task = require('task-runner').Task;
 
 Browsers
 ========
