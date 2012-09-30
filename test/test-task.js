@@ -1,26 +1,44 @@
 
-var TaskRunner = require('../lib/taskrunner').TaskRunner,
-    Task = require('../lib/taskrunner').Task,
+var TestCase = require('unit-test').TestCase,
+   Assertions = require('unit-test').Assertions,
+   sinon = require('unit-test').Sinon;
 
-    equals = require('assert').equal;
+module.exports = new TestCase('Tasks', function() {
 
-TaskRunner.scheduleNextOperation = function(fn) { fn() };
+   var taskRunner, taskRunnerScheduleNextOperation;
+   var TaskRunner = require('../lib/taskrunner').TaskRunner;
+   var Task = require('../lib/task');
 
-var a, b, c;
+   return {
+      setUp: function() {
+         taskRunnerScheduleNextOperation = TaskRunner.scheduleNextOperation;
+         TaskRunner.scheduleNextOperation = function(fn) { fn() };
+         taskRunner = new TaskRunner;
+      },
+      tearDown: function() {
+         taskRunner = null;
+         TaskRunner.scheduleNextOperation = taskRunnerScheduleNextOperation;
+      },
+      "test Can add tasks to a task runner": function() {
+         var a, b, c;
+         var taskA = new Task(a = sinon.spy(), 'a', false),
+             taskB = new Task(b = sinon.spy(function(next) { next(); }), 'b'),
+             taskC = new Task(c = sinon.spy(), 'c', false);
 
-var taskRunner = new TaskRunner();
-taskRunner.push(new Task(function(next) {
-   a = 1;
-}, 'MyTask-a', false));
-taskRunner.push(new Task(function(next) {
-   b = a + a; next();
-}, 'My Async Task'));
-taskRunner.push(new Task(function(next) {
-   c = b + b;
-}, 'MyTask-b', false));
+         taskRunner.push(taskA);
+         taskRunner.push(taskB);
+         taskRunner.push(taskC);
+         taskRunner.start();
 
-taskRunner.start();
+         Assertions.assert(a.calledOnce, 'Called first task')
+                   .assert(b.calledOnce, 'Called second task')
+                   .assert(c.calledOnce, 'Called third task');
 
-equals(a, 1);
-equals(b, 2);
-equals(c, 4);
+         Assertions.assert(a.calledBefore(b), 'Called A before other tasks')
+                   .assert(b.calledBefore(c), 'Called B before other tasks, but after A');
+      }
+   }
+
+});
+
+

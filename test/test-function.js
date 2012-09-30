@@ -1,26 +1,37 @@
 
-var TaskRunner = require('../lib/taskrunner').TaskRunner,
-    Task = require('../lib/taskrunner').Task,
+var TestCase = require('unit-test').TestCase,
+    Assertions = require('unit-test').Assertions,
+    sinon = require('unit-test').Sinon;
 
-    equals = require('assert').equal;
+module.exports = new TestCase('Functions', function() {
 
-TaskRunner.scheduleNextOperation = function(fn) { fn() };
+   var taskRunner, taskRunnerScheduleNextOperation;
+   var TaskRunner = require('../lib/taskrunner').TaskRunner;
 
-var a, b, c;
+   return {
+      setUp: function() {
+         taskRunnerScheduleNextOperation = TaskRunner.scheduleNextOperation;
+         TaskRunner.scheduleNextOperation = function(fn) { fn() };
+         taskRunner = new TaskRunner;
+      },
+      tearDown: function() {
+         taskRunner = null;
+         TaskRunner.scheduleNextOperation = taskRunnerScheduleNextOperation;
+      },
+      "test Can add functions to a task runner": function() {
+         var a = sinon.spy(),
+             b = sinon.spy(function(next) {next();}),
+             c = sinon.spy();
 
-var taskRunner = new TaskRunner();
-taskRunner.push(function(next) {
-   a = 1;
-}, '', false);
-taskRunner.push(function(next) {
-   b = a + a; next();
+         taskRunner.push(a, '', false);
+         taskRunner.push(b);
+         taskRunner.push(c, '', false);
+         taskRunner.start();
+
+         Assertions.assert(a.calledOnce).assert(b.calledOnce).assert(c.calledOnce);
+         Assertions.assert(a.calledBefore(b)).assert(b.calledBefore(c));
+      }
+   }
+
 });
-taskRunner.push(function(next) {
-   c = b + b;
-}, '', false);
 
-taskRunner.start();
-
-equals(a, 1);
-equals(b, 2);
-equals(c, 4);
