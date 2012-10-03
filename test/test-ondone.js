@@ -1,30 +1,46 @@
 
-var TaskRunner = require('../lib/taskrunner').TaskRunner,
-    Task = require('../lib/taskrunner').Task,
+var TestCase = require('unit-test').TestCase,
+   Assertions = require('unit-test').Assertions,
+   sinon = require('unit-test').Sinon;
 
-    equals = require('assert').equal;
+module.exports = new TestCase('OnDone', function() {
 
-TaskRunner.scheduleNextOperation = function(fn) { fn() };
+   var taskRunner, taskRunnerScheduleNextOperation;
+   var TaskRunner = require('../lib/taskrunner').TaskRunner;
+   var Task = require('../lib/task');
 
-var a, b, c, d;
+   return {
+      setUp: function() {
+         taskRunnerScheduleNextOperation = TaskRunner.scheduleNextOperation;
+         TaskRunner.scheduleNextOperation = function(fn) { fn() };
+      },
+      tearDown: function() {
+         taskRunner = null;
+         TaskRunner.scheduleNextOperation = taskRunnerScheduleNextOperation;
+      },
+      "test Completion handler called after all tasks are done": function() {
+         var a = sinon.spy(),
+            b = sinon.spy(function(next) {next();}),
+            c = sinon.spy(),
+            onDone = sinon.spy();
 
-var taskRunner = new TaskRunner();
-taskRunner.push(new Task(function(next) {
-   a = 1;
-}, 'MyTask-a', false));
-taskRunner.push(new Task(function(next) {
-   b = a + a; next();
-}, 'My Async Task'));
-taskRunner.push(new Task(function(next) {
-   c = b + b;
-}, 'MyTask-b', false));
+         taskRunner = new TaskRunner();
+         taskRunner.push(new Task(a, 'MyTask-a', false));
+         taskRunner.push(new Task(b, 'My Async Task'));
+         taskRunner.push(new Task(c, 'MyTask-b', false));
+         taskRunner.start(onDone);
 
-taskRunner.start(function() {
-   equals(a, 1);
-   equals(b, 2);
-   equals(c, 4);
+         Assertions.assert(a.calledOnce);
+         Assertions.assert(b.calledOnce);
+         Assertions.assert(c.calledOnce);
 
-   d = true;
+         Assertions.assert(a.calledBefore(b));
+         Assertions.assert(b.calledBefore(c));
+
+         Assertions.assert(onDone.calledOnce);
+         Assertions.assert(onDone.calledAfter(c));
+      }
+   }
+
 });
 
-equals(d, true);
