@@ -10,7 +10,7 @@
    },
    "keywords":          ["task", "runner"],
    "repository":        "git://github.com/steveukx/taskrunner.js",
-   "main":              "lib/taskrunner",
+   "main":              "lib/export.js",
    "bin":               {},
    "scripts":           {
       "test": "node test/test.js"

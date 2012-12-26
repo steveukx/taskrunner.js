@@ -3,7 +3,7 @@ var TestCase = require('unit-test').TestCase,
     AsyncTest = require('unit-test').AsyncTest,
     Assertions = require('unit-test').Assertions,
     sinon = require('unit-test').Sinon,
-    TaskRunner = require('../lib/taskrunner').TaskRunner;
+    TaskRunner = require('../lib/export').TaskRunner;
 
 var taskRunner, spies, then, now;
 

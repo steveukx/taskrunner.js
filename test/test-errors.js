@@ -6,7 +6,7 @@ var TestCase = require('unit-test').TestCase,
 module.exports = new TestCase('Errors', function() {
 
    var taskRunner, taskRunnerScheduleNextOperation;
-   var TaskRunner = require('../lib/taskrunner').TaskRunner;
+   var TaskRunner = require('../lib/taskrunner');
    var errorSpy;
 
    return {
