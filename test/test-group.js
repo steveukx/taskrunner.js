@@ -26,7 +26,7 @@ module.exports = {
           }));
 
           group.async(spies.secondAsync = sinon.spy(function(next) {
-             setTimeout(spies.secondDone = sinon.spy(next), 50);
+             setTimeout(spies.secondDone = sinon.spy(next), 20);
           }));
 
           taskRunner.sync(spies.firstSync = sinon.spy(function(next) {
