@@ -84,7 +84,7 @@ To run the same process but be informed when the tasks have been completed, pass
       document.body.className = '';
     });
 
-Tasks that don't start any asyncronous processes can be created as synchronous tasks, these tasks are still called in the
+Tasks that don't start any asynchronous processes can be created as synchronous tasks, these tasks are still called in the
 same way as regular asynchronous tasks, but they don't need to call the `next` method for themselves as this will be done
 automatically.
 
@@ -98,3 +98,12 @@ automatically.
 
 Notice that the synchronous task doesn't need to call anything to allow the TaskRunner to continue with other Tasks.
 
+Tasks that use the `next` handler function can supply both error and results back to the TaskRunner, the results are
+ then available as `taskRunner.result()` as an object using the name of the task as a key.
+
+    new TaskRunner()
+      .async('stepOne', function (next) { next(null, "Returned value" })
+      .start(function (taskRunner) {
+         var result = taskRunner.result();
+         // result.stepOne === "Returned value"
+      });

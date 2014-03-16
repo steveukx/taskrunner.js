@@ -36,6 +36,18 @@ module.exports = new TestCase('Tasks', function() {
 
          Assertions.assert(a.calledBefore(b), 'Called A before other tasks')
                    .assert(b.calledBefore(c), 'Called B before other tasks, but after A');
+      },
+
+      "test Can reverse order of arguments": function() {
+         taskRunner.sync("a", function (next) {
+            next(null, "A")
+         });
+         taskRunner.sync(function (next) {
+            next(null, "B")
+         }, "b");
+         taskRunner.start();
+
+         Assertions.assertSame({"a": "A", "b": "B"}, taskRunner.result(), "Results should be stored for each task");
       }
    }
 
